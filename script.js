@@ -205,8 +205,8 @@ class LuckyDraw {
         // Start number rotation animation
         this.startNumberRotation();
         
-        // Stop after 15 seconds
-        const spinDuration = 15000;
+        // Stop after 10 seconds
+        const spinDuration = 10000;
         
         setTimeout(() => {
             this.stopDraw();
@@ -248,7 +248,8 @@ class LuckyDraw {
             prize: this.currentPrize
         });
         
-        // Update displays (wait for all characters to display - 10 chars * ~7.5s avg = ~75s + buffer)
+        // Update displays 
+        // Total time = 10s (spin) + (5 * 2s) (last digit at index 5) = 20s
         setTimeout(() => {
             this.updateParticipantsDisplay();
             this.updateWinnersList();
@@ -262,22 +263,25 @@ class LuckyDraw {
             drawBtn.classList.remove('spinning');
             drawBtn.querySelector('span').textContent = 'QUAY SỐ';
             this.isSpinning = false;
-        }, 90000);
+        }, 10000);
     }
     
     displayWinnerNumber(participant) {
         const code = typeof participant === 'object' ? (participant.code || participant.number) : participant;
-        const digits = code.split('');
+        
+        // Extract only the numeric part from the code (remove letters)
+        const numberPart = code.replace(/[^0-9]/g, '');
+        const digits = numberPart.split('').slice(-6); // Get last 6 digits
+        
+        // Fixed delay for each character to have consistent timing
+        const baseDelay = 2000; // 2 seconds per character
         
         this.numberBoxes.forEach((box, index) => {
-            // Random delay between 5-10 seconds for each character
-            const baseDelay = 5000 + Math.random() * 5000;
-            
             setTimeout(() => {
                 // Stop rotating for this specific box
                 box.classList.remove('rotating');
                 
-                box.textContent = digits[index] || '';
+                box.textContent = digits[index] || '0';
                 box.parentElement.classList.add('winner');
                 
                 setTimeout(() => {
