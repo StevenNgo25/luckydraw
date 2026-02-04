@@ -59,7 +59,8 @@ class LuckyDraw {
                 if (input) {
                     input.value = this.participants.map(p => {
                         if (typeof p === 'object') {
-                            return `${p.number} - ${p.name}`;
+                            const code = p.code || p.number || '';
+                            return `${code} - ${p.name}`;
                         }
                         return p;
                     }).join('\n');
@@ -75,8 +76,9 @@ class LuckyDraw {
                     this.winners.forEach(winner => {
                         const winnerItem = document.createElement('div');
                         winnerItem.className = 'winner-item';
+                        const displayCode = winner.code || winner.number || '';
                         winnerItem.innerHTML = `
-                            <div class="winner-number">${winner.number}</div>
+                            <div class="winner-number">${displayCode}</div>
                             <div class="winner-name">${winner.name || ''}</div>
                             <div class="winner-prize">${winner.prize}</div>
                         `;
@@ -93,11 +95,11 @@ class LuckyDraw {
     }
     
     loadSampleData() {
-        // Load sample participant data with number and name
+        // Load sample participant data with code and name
         const sampleParticipants = [];
         for (let i = 1; i <= 100; i++) {
             sampleParticipants.push({
-                number: String(i).padStart(6, '0'),
+                code: `VNPT${String(i).padStart(6, '0')}`,
                 name: `Người tham gia ${i}`
             });
         }
@@ -130,18 +132,19 @@ class LuckyDraw {
             return;
         }
         
-        // Parse number and name (format: "number - name" or just "number")
+        // Parse code and name (format: "code - name" or just "code")
+        // Code format: <prefix><number> e.g., VNPT0001, CTV00001
         this.participants = lines.map(line => {
             const parts = line.split('-').map(p => p.trim());
             if (parts.length >= 2) {
-                // Has name
-                const number = parts[0].replace(/\D/g, '').padStart(6, '0');
+                // Has name: "code - name"
+                const code = parts[0].trim();
                 const name = parts.slice(1).join(' - ');
-                return { number, name };
+                return { code, name };
             } else {
-                // Only number
-                const number = line.replace(/\D/g, '').padStart(6, '0');
-                return { number, name: 'Người tham gia' };
+                // Only code
+                const code = line.trim();
+                return { code, name: 'Người tham gia' };
             }
         });
         
@@ -202,8 +205,8 @@ class LuckyDraw {
         // Start number rotation animation
         this.startNumberRotation();
         
-        // Stop after random time (5-7 seconds)
-        const spinDuration = 5000 + Math.random() * 2000;
+        // Stop after 15 seconds
+        const spinDuration = 15000;
         
         setTimeout(() => {
             this.stopDraw();
@@ -226,10 +229,7 @@ class LuckyDraw {
     stopDraw() {
         clearInterval(this.spinInterval);
         
-        // Remove rotating animation
-        this.numberBoxes.forEach(box => {
-            box.classList.remove('rotating');
-        });
+        // DON'T remove rotating animation here - let displayWinnerNumber handle it per box
         
         // Pick a random winner
         const randomIndex = Math.floor(Math.random() * this.remainingParticipants.length);
@@ -243,12 +243,12 @@ class LuckyDraw {
         
         // Add to winners list
         this.winners.push({
-            number: typeof winner === 'object' ? winner.number : winner,
+            code: typeof winner === 'object' ? (winner.code || winner.number) : winner,
             name: typeof winner === 'object' ? winner.name : 'Người tham gia',
             prize: this.currentPrize
         });
         
-        // Update displays
+        // Update displays (wait for all characters to display - 10 chars * ~7.5s avg = ~75s + buffer)
         setTimeout(() => {
             this.updateParticipantsDisplay();
             this.updateWinnersList();
@@ -262,22 +262,28 @@ class LuckyDraw {
             drawBtn.classList.remove('spinning');
             drawBtn.querySelector('span').textContent = 'QUAY SỐ';
             this.isSpinning = false;
-        }, 3500);
+        }, 90000);
     }
     
     displayWinnerNumber(participant) {
-        const number = typeof participant === 'object' ? participant.number : participant;
-        const digits = number.split('');
+        const code = typeof participant === 'object' ? (participant.code || participant.number) : participant;
+        const digits = code.split('');
         
         this.numberBoxes.forEach((box, index) => {
+            // Random delay between 5-10 seconds for each character
+            const baseDelay = 5000 + Math.random() * 5000;
+            
             setTimeout(() => {
-                box.textContent = digits[index] || '0';
+                // Stop rotating for this specific box
+                box.classList.remove('rotating');
+                
+                box.textContent = digits[index] || '';
                 box.parentElement.classList.add('winner');
                 
                 setTimeout(() => {
                     box.parentElement.classList.remove('winner');
-                }, 800);
-            }, index * 500);
+                }, 1500);
+            }, index * baseDelay);
         });
     }
     
@@ -303,8 +309,9 @@ class LuckyDraw {
         
         const winnerItem = document.createElement('div');
         winnerItem.className = 'winner-item';
+        const displayCode = lastWinner.code || lastWinner.number || '';
         winnerItem.innerHTML = `
-            <div class="winner-number">${lastWinner.number}</div>
+            <div class="winner-number">${displayCode}</div>
             <div class="winner-name">${lastWinner.name || ''}</div>
             <div class="winner-prize">${lastWinner.prize}</div>
         `;
@@ -330,11 +337,12 @@ class LuckyDraw {
         // Create popup content
         const popup = document.createElement('div');
         popup.className = 'popup-content';
+        const displayCode = winner.code || winner.number || '';
         popup.innerHTML = `
             <div class="popup-icon">🎉</div>
-            <h2 class="popup-title">CHÚC MỪNG!</h2>
+            <h2 class="popup-title">CHÚC MỮNG!</h2>
             <div class="popup-winner-info">
-                <div class="popup-number">VNPT${winner.number}</div>
+                <div class="popup-number">${displayCode}</div>
                 <div class="popup-name">${winner.name}</div>
             </div>
             <div class="popup-prize">Đã trúng ${reward}</div>
