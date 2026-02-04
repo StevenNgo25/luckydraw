@@ -295,8 +295,10 @@ class LuckyDraw {
             this.winners.forEach(winner => {
                 const winnerItem = document.createElement('div');
                 winnerItem.className = 'winner-item';
+                const displayCode = winner.code || winner.number || '';
                 winnerItem.innerHTML = `
-                    <div class="winner-number">${winner.number}</div>
+                    <div class="winner-number">${displayCode}</div>
+                    <div class="winner-name">${winner.name || ''}</div>
                     <div class="winner-prize">${winner.prize}</div>
                 `;
                 winnersList.appendChild(winnerItem);
