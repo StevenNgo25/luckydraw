@@ -168,7 +168,7 @@ class LuckyDraw {
     }
     
     navigatePrize(direction) {
-        const prizes = ['giải đặc biệt', 'giải nhất', 'giải nhì', 'giải ba', 'giải khuyến khích'];
+        const prizes = ['giải đặc biệt', 'giải nhất', 'giải nhì', 'giải ba'];
         const currentIndex = prizes.indexOf(this.currentPrize);
         let newIndex = currentIndex + direction;
         
@@ -202,8 +202,8 @@ class LuckyDraw {
         // Start number rotation animation
         this.startNumberRotation();
         
-        // Stop after random time (3-5 seconds)
-        const spinDuration = 3000 + Math.random() * 2000;
+        // Stop after random time (5-7 seconds)
+        const spinDuration = 5000 + Math.random() * 2000;
         
         setTimeout(() => {
             this.stopDraw();
@@ -313,6 +313,16 @@ class LuckyDraw {
     }
     
     showCongratulationsPopup(winner) {
+        // Map prizes to rewards
+        const prizeRewards = {
+            'giải đặc biệt': 'Máy sấy TOSHIBA',
+            'giải nhất': 'Loa Tháp Karaoke Samsung',
+            'giải nhì': 'Sưởi gốm Nagakawa',
+            'giải ba': 'Nồi chiên không dầu'
+        };
+        
+        const reward = prizeRewards[winner.prize] || winner.prize.toUpperCase();
+        
         // Create popup overlay
         const overlay = document.createElement('div');
         overlay.className = 'popup-overlay';
@@ -327,7 +337,7 @@ class LuckyDraw {
                 <div class="popup-number">VNPT${winner.number}</div>
                 <div class="popup-name">${winner.name}</div>
             </div>
-            <div class="popup-prize">Đã trúng ${winner.prize.toUpperCase()}</div>
+            <div class="popup-prize">Đã trúng ${reward}</div>
             <button class="popup-close">Đóng</button>
         `;
         
