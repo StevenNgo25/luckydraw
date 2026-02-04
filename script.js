@@ -346,7 +346,7 @@ class LuckyDraw {
         const displayCode = winner.code || winner.number || '';
         popup.innerHTML = `
             <div class="popup-icon">🎉</div>
-            <h2 class="popup-title">CHÚC MỮNG!</h2>
+            <h2 class="popup-title">CHÚC MỪNG!</h2>
             <div class="popup-winner-info">
                 <div class="popup-number">${displayCode}</div>
                 <div class="popup-name">${winner.name}</div>
